@@ -127,7 +127,7 @@ public:
 	}
 
 	void heap_sort() {
-		make_heap(data);
+		make_heap();
 		int heapSize = data.size();
 
 		for (int count = heapSize - 1; count > 0; --count) {
