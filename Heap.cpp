@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <vector>
 
 template <class TKey, class TValue>
@@ -20,6 +20,9 @@ private:
 	int rightChild(int i) {
 		return (2 * i + 2);
 	}
+	int child(int i, int k) {
+		return 2 * i + k;
+	}
 	int minChild(int i) {
 		int left = leftChild(i);
 		int right = rightChild(i);
@@ -31,16 +34,21 @@ private:
 			return (data[left].key < data[right].key) ? left : right;
 		}
 	}
-	void diving(int i) {
-		int j1 = i;
-		int j2 = minChild(i);
-		while (j2 != -1 &&
-			data[j1].key > data[j2].key) {
-			std::swap(data[j1], data[j2]);
-			j1 = j2;
-			j2 = minChild(j1);
+	void diving(int i, int size) {
+		int largest = i;
+		for (int k = 1; k <= 2; k++) {
+			int childIndex = child(i, k);
+			if (childIndex < size && data[childIndex].key < data[largest].key) {
+				largest = childIndex;
+			}
+		}
+
+		if (largest != i) {
+			std::swap(data[i], data[largest]);
+			diving(largest, size);
 		}
 	}
+
 	void emerson(int i) {
 		int j1 = i;
 		int j2 = parent(i);
@@ -81,7 +89,9 @@ public:
 		int index = findIndex(key);
 		if (index == -1)
 			throw std::exception("ERROR: u can't remove element from heap if he is out");
+		Data temp = data[index];
 		data[index] = data[data.size() - 1];
+		data[data.size() - 1] = temp;
 		if (index != 0 && data[index].key > data[(index - 1) / 2].key)
 			emerson(index);
 		else diving(index);
@@ -122,32 +132,30 @@ public:
 		}
 	}
 	void make_heap() {
-		for (int count = data.size() / 2 - 1; count >= 0; --count)
-			diving(count);
+		int size = data.size();
+		for (int count = size / 2; count >= 0; --count)
+			diving(count, size);
 	}
-
 	void heap_sort() {
 		make_heap();
 		int heapSize = data.size();
-
-		for (int count = heapSize - 1; count > 0; --count) {
+		for (int count = heapSize - 1; count >= 0; count--) {
 			std::swap(data[0], data[count]);
-			--heapSize;
-			diving(0);
+			diving(0, count);
 		}
+	}
+	void printArr() {
+		for (int count = 0; count < data.size(); ++count) {
+			std::cout << data[count].key << " ";
+		}
+		std::cout << std::endl;
 	}
 };
 
 int main() {
 	Heap<int, int> h({{1,1},{3,3},{2,1},{6,1},{4,1},{5,1},{8,1},{9,1},{13,1} });
 	h.print();
-	std::cout << "==================" << std::endl;
-	h.insert(1, 1);
-	h.insert(2, 1100);
-	h.insert(5, 1);
-	h.insert(-1, 1);
-	h.print();
-	std::cout << "==================" << std::endl;
-	h.remove(2);
-	h.print();
+	h.printArr();
+	h.heap_sort();
+	h.printArr();
 }
